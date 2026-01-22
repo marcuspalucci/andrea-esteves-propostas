@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gerador • Proposta Silêncio Luxuoso</title>
+
+  <style>
+    /* ===== Fontes Playfair Display ===== */
+    @font-face {
+      font-family: 'Playfair Display';
+      src: url('PlayfairDisplay-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Playfair Display';
+      src: url('PlayfairDisplay-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Playfair Display';
+      src: url('PlayfairDisplay-Italic-VariableFont_wght.ttf') format('truetype');
+      font-weight: 400 900;
+      font-style: italic;
+      font-display: swap;
+    }
+
+    :root {
+      --paper: #F4EFE6;
+      --ink: #171717;
+      --muted: rgba(23, 23, 23, .62);
+      --hair: rgba(23, 23, 23, .18);
+
+      --serif: 'Playfair Display', ui-serif, Georgia, "Times New Roman", serif;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+
+      --w: 210mm;
+      --h: 297mm;
+      --m: 26mm;
+    }
+
+    /* ===== UI do gerador (não imprime) ===== */
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: #0f0f0f;
+      color: #fff;
+    }
+
+    .wrap {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 18px 14px 60px;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 18px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 10px;
+    }
+
+    .panel h2 {
+      grid-column: 1 / -1;
+      margin: 4px 0 6px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      color: rgba(255, 255, 255, .92);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, .72);
+    }
+
+    input,
+    select,
+    textarea {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      background: rgba(255, 255, 255, .06);
+      color: rgba(255, 255, 255, .92);
+      outline: none;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    textarea {
+      border-radius: 16px;
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .actions {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, .18);
+      background: rgba(255, 255, 255, .10);
+      color: rgba(255, 255, 255, .92);
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, .14);
+    }
+
+    .btn.danger {
+      background: rgba(220, 50, 50, .25);
+      border-color: rgba(220, 50, 50, .4);
+    }
+
+    .btn.danger:hover {
+      background: rgba(220, 50, 50, .35);
+    }
+
+    .btn.success {
+      background: rgba(50, 180, 100, .25);
+      border-color: rgba(50, 180, 100, .4);
+    }
+
+    .btn.success:hover {
+      background: rgba(50, 180, 100, .35);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: rgba(255, 255, 255, .62);
+      line-height: 1.35;
+    }
+
+    /* ===== Gerenciador de Campos ===== */
+    .field-manager {
+      grid-column: 1 / -1;
+      border-top: 1px solid rgba(255, 255, 255, .12);
+      margin-top: 8px;
+      padding-top: 14px;
+    }
+
+    .field-manager h3 {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, .72);
+      margin: 0 0 10px 0;
+    }
+
+    .field-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, .04);
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+
+    .field-item .field-name {
+      flex: 1;
+      font-size: 12px;
+      color: rgba(255, 255, 255, .85);
+    }
+
+    .field-item .field-type {
+      font-size: 10px;
+      color: rgba(255, 255, 255, .5);
+      background: rgba(255, 255, 255, .08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .field-item .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    .add-field-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 12px;
+      background: rgba(255, 255, 255, .04);
+      border-radius: 10px;
+    }
+
+    .add-field-form .field {
+      margin: 0;
+    }
+
+    .add-field-form .actions {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+    }
+
+    .custom-fields-container {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* ===== Prévia ===== */
+    .preview {
+      margin-top: 16px;
+      display: grid;
+      gap: 18px;
+      justify-items: center;
+    }
+
+    /* ===== Documento (imprime) ===== */
+    .doc {
+      background: #0f0f0f;
+    }
+
+    .page {
+      width: var(--w);
+      height: var(--h);
+      background: var(--paper);
+      position: relative;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, .45);
+      overflow: hidden;
+    }
+
+    .pad {
+      padding: var(--m);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    .kicker {
+      font-size: 9.5pt;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8pt;
+    }
+
+    .h1 {
+      font-family: var(--serif);
+      font-size: 28pt;
+      line-height: 1.1;
+      font-weight: 650;
+      margin: 0 0 16pt 0;
+    }
+
+    .h1.sm {
+      font-size: 24pt;
+      margin-bottom: 14pt;
+    }
+
+    .lead {
+      font-size: 11.2pt;
+      line-height: 1.65;
+      max-width: 145mm;
+      margin: 0 0 10pt 0;
+    }
+
+    .hairline {
+      height: 1px;
+      background: var(--hair);
+      margin: 16pt 0;
+    }
+
+    .bullets {
+      display: grid;
+      gap: 8pt;
+      margin-top: 8pt;
+      max-width: 160mm;
+    }
+
+    .bullet {
+      display: flex;
+      gap: 9pt;
+    }
+
+    .dot {
+      width: 5pt;
+      height: 5pt;
+      background: var(--ink);
+      border-radius: 50%;
+      margin-top: 6pt;
+    }
+
+    .bullet p {
+      margin: 0;
+      font-size: 10.6pt;
+      line-height: 1.55;
+    }
+
+    .invest-kicker {
+      font-size: 9.5pt;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 14pt;
+    }
+
+    .invest-box {
+      margin-top: 8pt;
+      border: 1px solid var(--hair);
+      border-radius: 12pt;
+      padding: 12pt 14pt;
+      display: flex;
+      justify-content: space-between;
+      gap: 12pt;
+    }
+
+    .invest-box .title {
+      font-size: 10.5pt;
+      margin-bottom: 5pt;
+    }
+
+    .invest-box .desc {
+      font-size: 9.8pt;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .invest-box .price {
+      font-family: var(--serif);
+      font-size: 18pt;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 10pt;
+      font-size: 8.8pt;
+      color: var(--muted);
+    }
+
+    .footer .line {
+      flex: 1;
+      height: 1px;
+      background: var(--hair);
+    }
+
+    .footer .page-no {
+      min-width: 18pt;
+      text-align: right;
+    }
+
+    /* Capa */
+    .cover {
+      position: absolute;
+      inset: 0;
+    }
+
+    .cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cover::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+          rgba(0, 0, 0, .35),
+          rgba(0, 0, 0, .15) 50%,
+          rgba(244, 239, 230, .75) 88%,
+          var(--paper));
+    }
+
+    .cover-content {
+      position: absolute;
+      left: var(--m);
+      bottom: 35mm;
+      max-width: 135mm;
+      color: var(--ink);
+    }
+
+    .brand {
+      font-size: 9pt;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .subbrand {
+      font-size: 9.2pt;
+      margin-top: 4pt;
+      color: rgba(23, 23, 23, .62);
+    }
+
+    .cover-title {
+      font-family: var(--serif);
+      font-size: 30pt;
+      line-height: 1.12;
+      margin-top: 14pt;
+    }
+
+    .cover-tag {
+      margin-top: 10pt;
+      font-size: 9pt;
+      display: flex;
+      gap: 10pt;
+      flex-wrap: wrap;
+    }
+
+    .cover-tag .pill {
+      border: 1px solid rgba(23, 23, 23, .18);
+      border-radius: 999px;
+      padding: 4pt 9pt;
+      background: rgba(255, 255, 255, .35);
+    }
+
+    /* Impressão */
+    @page {
+      size: A4;
+      margin: 0 !important;
+    }
+
+    @media print {
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: var(--paper);
+        width: 100%;
+        height: 100%;
+      }
+
+      /* ✅ Esconde só o painel (formulário), mantém a prévia */
+      .panel {
+        display: none !important;
+      }
+
+      /* ✅ mantém o container e a prévia visíveis */
+      .wrap {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+      }
+
+      .preview {
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 0 !important;
+        justify-items: stretch !important;
+        display: block !important;
+      }
+
+      /* ✅ páginas em sequência para PDF */
+      .page {
+        width: 100% !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+        page-break-inside: avoid;
+      }
+
+      .pad {
+        padding: var(--m);
+        box-sizing: border-box;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h2>Gerador de Proposta • Silêncio Luxuoso</h2>
+
+      <div class="field">
+        <label>Cliente</label>
+        <input id="fCliente" placeholder="Ex: Bruno e Alessandra">
+      </div>
+
+      <div class="field">
+        <label>Projeto</label>
+        <input id="fProjeto" placeholder="Ex: Residência Alphaville">
+      </div>
+
+      <div class="field">
+        <label>Tipo</label>
+        <select id="fTipo">
+          <option value="residencial">Residencial</option>
+          <option value="institucional">Institucional</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Data (auto, pode editar)</label>
+        <input id="fData" placeholder="11/01/2026">
+      </div>
+
+      <div class="field">
+        <label>Valor</label>
+        <input id="fValor" placeholder="Ex: R$ 28.500">
+      </div>
+
+      <div class="field">
+        <label>Observação curta (opcional)</label>
+        <input id="fObs" placeholder="Ex: Valores válidos por 30 dias (padrão)">
+      </div>
+
+      <div class="field" style="grid-column:1/-1;">
+        <label>Nota interna (não imprime) — opcional</label>
+        <textarea id="fNota" placeholder="Use aqui para você lembrar algo do projeto. Não aparece no PDF."></textarea>
+      </div>
+
+      <!-- Campos personalizados dinâmicos -->
+      <div class="custom-fields-container" id="customFieldsContainer"></div>
+
+      <div class="actions">
+        <button class="btn" id="btnAtualizar">Atualizar prévia</button>
+        <button class="btn" id="btnImprimir">Imprimir / Salvar PDF</button>
+        <button class="btn" id="btnBaixar">Baixar HTML preenchido</button>
+        <div class="hint">
+          No print: marque <b>Gráficos de plano de fundo</b> e desmarque <b>Cabeçalhos e rodapés</b>.
+        </div>
+      </div>
+
+      <!-- Gerenciador de Campos -->
+      <div class="field-manager">
+        <h3>Gerenciar Campos Personalizados</h3>
+        <div id="fieldsList"></div>
+
+        <div class="add-field-form" id="addFieldForm">
+          <div class="field">
+            <label>Nome do campo</label>
+            <input id="newFieldName" placeholder="Ex: Metragem">
+          </div>
+          <div class="field">
+            <label>Tipo</label>
+            <select id="newFieldType">
+              <option value="text">Texto curto</option>
+              <option value="textarea">Texto longo</option>
+              <option value="select">Seleção</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Placeholder</label>
+            <input id="newFieldPlaceholder" placeholder="Ex: 500m²">
+          </div>
+          <div class="field">
+            <label>Onde aparece</label>
+            <select id="newFieldTarget">
+              <option value="cover">Capa (tags)</option>
+              <option value="page3">Página 3 (observações)</option>
+              <option value="none">Apenas formulário</option>
+            </select>
+          </div>
+          <div class="field" id="selectOptionsField" style="grid-column:1/-1; display:none;">
+            <label>Opções (separadas por vírgula)</label>
+            <input id="newFieldOptions" placeholder="Ex: Pequeno, Médio, Grande">
+          </div>
+          <div class="actions">
+            <button class="btn success" id="btnAddField">+ Adicionar Campo</button>
+            <button class="btn danger" id="btnResetFields">Restaurar Padrão</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" id="preview">
+      <!-- páginas serão renderizadas aqui -->
+    </div>
+  </div>
+
+  <script>
+    /* ===== Config ===== */
+    const COVER_IMAGE = "WhatsApp Image 2026-01-11 at 21.25.38 (3).jpeg";
+    const VALIDITY_TEXT = "Proposta emitida em {DATA}. Valores válidos por 30 dias, sujeitos a ajustes em caso de alteração de escopo.";
+    const STORAGE_KEY = "proposta_custom_fields";
+    const VALUES_KEY = "proposta_field_values";
+
+    /* ===== Campos Personalizados ===== */
+    let customFields = [];
+
+    function loadCustomFields() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          customFields = JSON.parse(saved);
+        } catch (e) {
+          customFields = [];
+        }
+      }
+    }
+
+    function saveCustomFields() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(customFields));
+    }
+
+    function saveFieldValues() {
+      const values = {};
+      customFields.forEach(f => {
+        const el = document.getElementById(`custom_${f.id}`);
+        if (el) values[f.id] = el.value;
+      });
+      // Salva também os campos padrão
+      ['fCliente', 'fProjeto', 'fTipo', 'fData', 'fValor', 'fObs', 'fNota'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) values[id] = el.value;
+      });
+      localStorage.setItem(VALUES_KEY, JSON.stringify(values));
+    }
+
+    function loadFieldValues() {
+      const saved = localStorage.getItem(VALUES_KEY);
+      if (saved) {
+        try {
+          const values = JSON.parse(saved);
+          // Restaura campos padrão
+          ['fCliente', 'fProjeto', 'fTipo', 'fData', 'fValor', 'fObs', 'fNota'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && values[id] !== undefined) el.value = values[id];
+          });
+          // Restaura campos personalizados
+          customFields.forEach(f => {
+            const el = document.getElementById(`custom_${f.id}`);
+            if (el && values[f.id] !== undefined) el.value = values[f.id];
+          });
+        } catch (e) {}
+      }
+    }
+
+    function addCustomField(name, type, placeholder, target, options = []) {
+      const id = `field_${Date.now()}`;
+      customFields.push({ id, name, type, placeholder, target, options });
+      saveCustomFields();
+      renderCustomFields();
+      renderFieldsList();
+      render();
+    }
+
+    function removeCustomField(id) {
+      customFields = customFields.filter(f => f.id !== id);
+      saveCustomFields();
+      renderCustomFields();
+      renderFieldsList();
+      render();
+    }
+
+    function resetCustomFields() {
+      if (confirm('Tem certeza que deseja remover todos os campos personalizados?')) {
+        customFields = [];
+        saveCustomFields();
+        renderCustomFields();
+        renderFieldsList();
+        render();
+      }
+    }
+
+    function renderCustomFields() {
+      const container = document.getElementById('customFieldsContainer');
+      if (!container) return;
+
+      container.innerHTML = customFields.map(f => {
+        let input = '';
+        if (f.type === 'textarea') {
+          input = `<textarea id="custom_${f.id}" placeholder="${esc(f.placeholder || '')}"></textarea>`;
+        } else if (f.type === 'select') {
+          const opts = (f.options || []).map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
+          input = `<select id="custom_${f.id}">${opts}</select>`;
+        } else {
+          input = `<input id="custom_${f.id}" placeholder="${esc(f.placeholder || '')}">`;
+        }
+        return `
+          <div class="field">
+            <label>${esc(f.name)}</label>
+            ${input}
+          </div>
+        `;
+      }).join('');
+
+      // Adiciona listeners para atualização automática
+      customFields.forEach(f => {
+        const el = document.getElementById(`custom_${f.id}`);
+        if (el) {
+          el.addEventListener('input', () => {
+            saveFieldValues();
+            render();
+          });
+        }
+      });
+
+      loadFieldValues();
+    }
+
+    function renderFieldsList() {
+      const container = document.getElementById('fieldsList');
+      if (!container) return;
+
+      if (customFields.length === 0) {
+        container.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,.5);padding:8px 0;">Nenhum campo personalizado adicionado.</div>';
+        return;
+      }
+
+      container.innerHTML = customFields.map(f => `
+        <div class="field-item">
+          <span class="field-name">${esc(f.name)}</span>
+          <span class="field-type">${f.type === 'textarea' ? 'Texto longo' : f.type === 'select' ? 'Seleção' : 'Texto'}</span>
+          <span class="field-type">${f.target === 'cover' ? 'Capa' : f.target === 'page3' ? 'Pág. 3' : 'Form'}</span>
+          <button class="btn btn-sm danger" onclick="removeCustomField('${f.id}')">×</button>
+        </div>
+      `).join('');
+    }
+
+    function getCustomFieldValue(id) {
+      const el = document.getElementById(`custom_${id}`);
+      return el ? el.value.trim() : '';
+    }
+
+    function getCustomFieldsByTarget(target) {
+      return customFields
+        .filter(f => f.target === target)
+        .map(f => ({ name: f.name, value: getCustomFieldValue(f.id) }))
+        .filter(f => f.value);
+    }
+
+    /* ===== Helpers ===== */
+    function todayBR() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yy = d.getFullYear();
+      return `${dd}/${mm}/${yy}`;
+    }
+    function esc(s) {
+      return (s ?? "").toString()
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    /* ===== Templates ===== */
+    function page1({ cliente, projeto, data }) {
+      // Campos personalizados para a capa
+      const coverFields = getCustomFieldsByTarget('cover');
+      const extraTags = coverFields.map(f =>
+        `<span>${esc(f.name)}: <b>${esc(f.value)}</b></span>`
+      ).join('');
+
+      return `
+  <section class="page" aria-label="Capa">
+    <div class="cover">
+      <img src="${esc(COVER_IMAGE)}" alt="Capa">
+    </div>
+    <div class="cover-content">
+      <div class="brand">ANDRÉA ESTEVES PROJETOS</div>
+      <div class="subbrand">Arquitetura externa • Paisagismo • Biofilia</div>
+      <div class="cover-title">
+        Jardins que acolhem,<br>
+        desaceleram<br>
+        e organizam a vida.
+      </div>
+      <div class="cover-tag">
+        <span>Cliente: <b>${esc(cliente)}</b></span>
+        ${extraTags}
+        <span>Projeto: <b>${esc(projeto)}</b></span>
+        <span>Data: <b>${esc(data)}</b></span>
+      </div>
+    </div>
+  </section>`;
+    }
+
+    function page2() {
+      return `
+  <section class="page" aria-label="Quem somos">
+    <div class="pad">
+      <div class="kicker">QUEM SOMOS</div>
+      <div class="h1">Autoridade tranquila.<br>Natureza com curadoria.</div>
+
+      <p class="lead">
+        Atuamos na criação de espaços externos pensados para o ritmo real da vida.
+        Nosso trabalho nasce do encontro entre técnica, sensibilidade e decisões bem sustentadas,
+        para que o jardim deixe de ser apenas um cenário.
+      </p>
+
+      <p class="lead"><b>Criamos jardins para viver — e não apenas para serem vistos.</b></p>
+
+      <div class="footer">
+        <span>Andréa Esteves Projetos</span>
+        <span class="line"></span>
+        <span class="page-no">02</span>
+      </div>
+    </div>
+  </section>`;
+    }
+
+    function page3({ tipo, valor, data, obs }) {
+      const isInst = tipo === "institucional";
+
+      const title = isInst
+        ? `Decisões seguras.<br>Valoriza o ativo.`
+        : `Decisões seguras.<br>Resultado duradouro.`;
+
+      const intro = isInst
+        ? `Você está contratando um projeto que reduz risco, aumenta previsibilidade e preserva coerência entre conceito e implantação.
+       Nosso foco é decisão clara, compatibilização e soluções que valorizam o ativo — sem ruído e sem improviso.`
+        : `Você está contratando mais do que um projeto paisagístico.
+       Está contratando um olhar que organiza o espaço para funcionar melhor no dia a dia e qualifica a experiência de viver.`;
+
+      const bullets = isInst
+        ? [
+          "Coerência entre paisagismo, arquitetura e diretrizes do empreendimento.",
+          "Escolhas técnicas com impacto direto em manutenção, durabilidade e implantação.",
+          "Compatibilização com projetos complementares para reduzir retrabalho.",
+          "Qualificação da experiência do usuário e valorização do produto imobiliário."
+        ]
+        : [
+          "Ambientes externos que acolhem e convidam à permanência.",
+          "Soluções que equilibram estética, conforto e funcionalidade.",
+          "Desenho autoral com decisões sustentadas.",
+          "Jardins pensados para convívio, descanso e rotina."
+        ];
+
+      const validity = VALIDITY_TEXT.replace("{DATA}", esc(data));
+      const obsLine = obs?.trim()
+        ? `<div style="margin-top:6pt;font-size:9.2pt;line-height:1.5;color:var(--ink);max-width:140mm;">${esc(obs)}</div>`
+        : "";
+
+      // Campos personalizados para página 3
+      const page3Fields = getCustomFieldsByTarget('page3');
+      const extraInfo = page3Fields.map(f =>
+        `<div style="margin-top:6pt;font-size:9.2pt;line-height:1.5;color:var(--ink);max-width:140mm;"><b>${esc(f.name)}:</b> ${esc(f.value)}</div>`
+      ).join('');
+
+      return `
+  <section class="page" aria-label="Escopo e investimento">
+    <div class="pad">
+      <div class="kicker">O QUE VOCÊ ESTÁ CONTRATANDO</div>
+      <div class="h1">${title}</div>
+
+      <p class="lead">${intro}</p>
+
+      <div class="bullets">
+        ${bullets.map(b => `
+          <div class="bullet"><span class="dot"></span><p>${esc(b)}</p></div>
+        `).join("")}
+      </div>
+
+      <div class="hairline"></div>
+
+      <div class="kicker">COMO CONDUZIMOS</div>
+      <div class="h1 sm">Processo vivo.<br>Coerência total.</div>
+
+      <p class="lead">
+        Cada projeto é conduzido de forma progressiva, respeitando as camadas técnicas, estéticas e emocionais do espaço,
+        para que o resultado permaneça ao longo do tempo.
+      </p>
+
+      <div class="invest-kicker">INVESTIMENTO</div>
+      <div class="invest-box">
+        <div>
+          <div class="title">Desenvolvimento completo do projeto paisagístico</div>
+          <div class="desc">Inclui concepção, curadoria de soluções e documentação técnica para execução.</div>
+        </div>
+        <div class="price">${esc(valor)}</div>
+      </div>
+
+      ${obsLine}
+      ${extraInfo}
+      <div style="margin-top:10pt;font-size:9.2pt;line-height:1.5;color:var(--muted);max-width:140mm;">
+        ${validity}
+      </div>
+
+      <div class="footer">
+        <span>Andréa Esteves Projetos</span>
+        <span class="line"></span>
+        <span class="page-no">03</span>
+      </div>
+    </div>
+  </section>`;
+    }
+
+    /* ===== Render ===== */
+    function readForm() {
+      const cliente = document.getElementById("fCliente").value.trim() || "_________";
+      const projeto = document.getElementById("fProjeto").value.trim() || "_________";
+      const tipo = document.getElementById("fTipo").value;
+      const data = document.getElementById("fData").value.trim() || todayBR();
+      const valor = document.getElementById("fValor").value.trim() || "R$ _________";
+      const obs = document.getElementById("fObs").value.trim();
+      return { cliente, projeto, tipo, data, valor, obs };
+    }
+
+    function render() {
+      const data = readForm();
+      const html = page1(data) + page2() + page3(data);
+      document.getElementById("preview").innerHTML = html;
+
+      // Atualiza o título da página para o nome do cliente (usado ao salvar PDF)
+      const clienteName = (data.cliente || "Cliente").replace(/[^\w\sáàâãéèêíìîóòôõúùûçÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇ]+/g, "").trim();
+      document.title = `${clienteName}_Projeto de Paisagismo_Andrea Esteves`;
+    }
+
+    /* ===== Export ===== */
+    function downloadFilledHTML() {
+      const data = readForm();
+
+      // Monta um HTML "standalone" só com o documento (sem painel),
+      // pronto para arquivar por projeto.
+      const clienteName = (data.cliente || "Cliente").replace(/[^\w\sáàâãéèêíìîóòôõúùûçÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇ]+/g, "").trim();
+      const filled =
+        `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>${clienteName}_Projeto de Paisagismo_Andrea Esteves</title>
+<style>
+${document.querySelector("style").innerHTML}
+/* Remove UI do gerador */
+.wrap,.panel,.editor,.hint,.actions{display:none!important;}
+.preview{margin:0;gap:0;justify-items:stretch;}
+.page{margin:0;box-shadow:none;page-break-after:always;}
+body{background:var(--paper);}
+</style>
+</head>
+<body>
+<div class="preview">
+${page1(data)}${page2()}${page3(data)}
+</div>
+</body>
+</html>`;
+
+      const blob = new Blob([filled], { type: "text/html;charset=utf-8" });
+      const a = document.createElement("a");
+      const safeName = `${clienteName}_Projeto de Paisagismo_Andrea Esteves.html`;
+      a.href = URL.createObjectURL(blob);
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    /* ===== Init ===== */
+    // Carrega campos personalizados salvos
+    loadCustomFields();
+
+    // Define data padrão se não houver valor salvo
+    if (!document.getElementById("fData").value) {
+      document.getElementById("fData").value = todayBR();
+    }
+
+    // Renderiza campos personalizados
+    renderCustomFields();
+    renderFieldsList();
+
+    // Carrega valores salvos
+    loadFieldValues();
+
+    // Listeners dos botões principais
+    document.getElementById("btnAtualizar").addEventListener("click", render);
+    document.getElementById("btnImprimir").addEventListener("click", () => window.print());
+    document.getElementById("btnBaixar").addEventListener("click", downloadFilledHTML);
+
+    // Atualiza automaticamente ao digitar (mais fluido)
+    ["fCliente", "fProjeto", "fTipo", "fData", "fValor", "fObs", "fNota"].forEach(id => {
+      document.getElementById(id).addEventListener("input", () => {
+        saveFieldValues();
+        render();
+      });
+    });
+
+    // Gerenciador de campos - mostrar/ocultar opções para select
+    document.getElementById("newFieldType").addEventListener("change", (e) => {
+      const optionsField = document.getElementById("selectOptionsField");
+      optionsField.style.display = e.target.value === "select" ? "block" : "none";
+    });
+
+    // Adicionar novo campo
+    document.getElementById("btnAddField").addEventListener("click", () => {
+      const name = document.getElementById("newFieldName").value.trim();
+      const type = document.getElementById("newFieldType").value;
+      const placeholder = document.getElementById("newFieldPlaceholder").value.trim();
+      const target = document.getElementById("newFieldTarget").value;
+      const optionsStr = document.getElementById("newFieldOptions").value.trim();
+      const options = type === "select" ? optionsStr.split(",").map(o => o.trim()).filter(o => o) : [];
+
+      if (!name) {
+        alert("Digite um nome para o campo.");
+        return;
+      }
+
+      if (type === "select" && options.length < 2) {
+        alert("Para campos de seleção, informe pelo menos 2 opções separadas por vírgula.");
+        return;
+      }
+
+      addCustomField(name, type, placeholder, target, options);
+
+      // Limpa formulário
+      document.getElementById("newFieldName").value = "";
+      document.getElementById("newFieldPlaceholder").value = "";
+      document.getElementById("newFieldOptions").value = "";
+    });
+
+    // Restaurar padrão
+    document.getElementById("btnResetFields").addEventListener("click", resetCustomFields);
+
+    render();
+  </script>
+</body>
+
+</html>
